@@ -27,7 +27,7 @@ echo Starting web server...
 echo Access on phone at:
 echo http://192.168.50.115:8000
 echo.
-uvicorn main:app --host 0.0.0.0 --port 8000
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 
 echo.
 echo Server stopped.
