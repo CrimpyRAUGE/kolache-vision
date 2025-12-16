@@ -2,8 +2,13 @@
   "camera": {
     "source": 0,
     "resolution": [1280, 720],
-    "rotate": 0
-    "debug": true
+    "rotate": 0,
+    "interval_seconds": 3,
+    "debug": true,
+
+    "occupied_threshold": 12.0,
+    "threshold_step": 0.5,
+    "threshold_step_coarse": 2.0
   },
   "trays": [
     {
