@@ -1,0 +1,26 @@
+{
+  "trays": [
+    { "id": 1, "name": "Ham Egg & Cheese", "category": "savory", "max": 12 },
+    { "id": 2, "name": "Sausage Egg & Cheese", "category": "savory", "max": 12 },
+    { "id": 3, "name": "Bacon Egg & Cheese", "category": "savory", "max": 12 },
+    { "id": 4, "name": "Cheesy bread", "category": "savory", "max": 12 },
+    { "id": 8, "name": "The Texan", "category": "savory", "max": 12 },
+    { "id": 9, "name": "Sausage Jalapeno", "category": "savory", "max": 12 },
+    { "id": 10, "name": "Bacon Jalapeno", "category": "savory", "max": 12 },
+    { "id": 11, "name": "Sausage & Gravy", "category": "savory", "max": 12 },
+    { "id": 15, "name": "Mexican omelette", "category": "savory", "max": 12 },
+    { "id": 16, "name": "Egg & Cheese", "category": "savory", "max": 12 },
+    { "id": 17, "name": "Ranchero", "category": "savory", "max": 12 },
+    { "id": 18, "name": "Monte Cristo", "category": "savory", "max": 12 },
+
+    { "id": 5, "name": "Strawberry & Cream", "category": "sweet", "max": 12 },
+    { "id": 6, "name": "Peach & Cream", "category": "sweet", "max": 12 },
+    { "id": 7, "name": "Blackberry & Plain Cream", "category": "sweet", "max": 12 },
+    { "id": 12, "name": "Weekly Special Sweet", "category": "sweet", "max": 12 },
+    { "id": 13, "name": "Raspberry & Cream", "category": "sweet", "max": 12 },
+    { "id": 14, "name": "Mixed Berry", "category": "sweet", "max": 12 },
+    { "id": 19, "name": "Strawberry Nutella", "category": "sweet", "max": 12 },
+    { "id": 20, "name": "Maple Pecan", "category": "sweet", "max": 12 },
+    { "id": 21, "name": "Cinnamon", "category": "sweet", "max": 12 }
+  ]
+}

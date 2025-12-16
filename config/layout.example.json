@@ -1,0 +1,7 @@
+{
+  "trays": [
+    { "id": 1, "name": "Sausage & Cheese", "max": 24 },
+    { "id": 2, "name": "Bacon Egg & Cheese", "max": 24 },
+    { "id": 3, "name": "Strawberry & Cream", "max": 24 }
+  ]
+}

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Kolache Availability</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+      :root {
+        --bg: #0d0f12;
+        --card: #161a20;
+        --text: #ffffff;
+        --muted: rgba(255, 255, 255, 0.7);
+        --good: #1f7a1f;
+        --low: #8a6d00;
+        --out: #7a1f1f;
+        --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        --radius: 18px;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: radial-gradient(1200px 600px at 50% 0%, #151a22 0%, var(--bg) 55%);
+        color: var(--text);
+      }
+
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 28px 18px 36px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .title {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(28px, 4vw, 54px);
+        letter-spacing: 0.5px;
+      }
+
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: clamp(14px, 1.6vw, 18px);
+      }
+
+      .btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text);
+        padding: 10px 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      @media (min-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 22px;
+        }
+      }
+
+      .group {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius);
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .group h2 {
+        margin: 4px 6px 14px;
+        font-size: clamp(18px, 2.4vw, 28px);
+        color: rgba(255, 255, 255, 0.92);
+      }
+
+      .item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 16px;
+        margin: 10px 6px;
+        border-radius: 14px;
+        font-size: clamp(16px, 2.1vw, 26px);
+        line-height: 1.2;
+      }
+
+      .name {
+        font-weight: 650;
+      }
+
+      .count {
+        font-weight: 900;
+        white-space: nowrap;
+        letter-spacing: 0.3px;
+      }
+
+      .available {
+        background: linear-gradient(180deg, rgba(31, 122, 31, 0.95), rgba(31, 122, 31, 0.75));
+      }
+
+      .low {
+        background: linear-gradient(180deg, rgba(138, 109, 0, 0.95), rgba(138, 109, 0, 0.75));
+      }
+
+      .soldout {
+        background: linear-gradient(180deg, rgba(122, 31, 31, 0.95), rgba(122, 31, 31, 0.75));
+        text-decoration: line-through;
+        opacity: 0.92;
+      }
+
+      footer {
+        margin-top: 16px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <header>
+        <div>
+          <div class="title">
+            <h1>🥐 Kolache Availability</h1>
+          </div>
+          <p class="sub" id="updated">Loading…</p>
+        </div>
+
+        <button class="btn" id="fsBtn">Fullscreen</button>
+      </header>
+
+      <div class="grid" id="grid">
+        <div class="group">
+          <h2>🥓 Savory</h2>
+          <div id="savory">Loading…</div>
+        </div>
+
+        <div class="group">
+          <h2>🍓 Sweet</h2>
+          <div id="sweet">Loading…</div>
+        </div>
+      </div>
+
+      <footer>
+        Auto-refreshes every 5 seconds
+      </footer>
+    </div>
+
+    <script>
+      function statusClass(current, max) {
+        if (current <= 0) return "soldout";
+        if (current <= Math.ceil(max * 0.25)) return "low";
+        return "available";
+      }
+
+      function renderList(targetEl, items) {
+        targetEl.innerHTML = "";
+
+        // sort by lowest inventory first
+        items.sort((a, b) => a.current - b.current);
+
+        for (const item of items) {
+          const row = document.createElement("div");
+          row.className = "item " + statusClass(item.current, item.max);
+
+          row.innerHTML = `
+            <div class="name">${item.name}</div>
+            <div class="count">${item.current <= 0 ? "SOLD OUT" : `${item.current} / ${item.max}`}</div>
+          `;
+
+          targetEl.appendChild(row);
+        }
+
+        if (items.length === 0) {
+          targetEl.innerHTML = `<div style="color:rgba(255,255,255,0.7); padding:10px 6px;">No items</div>`;
+        }
+      }
+
+      async function loadInventory() {
+        try {
+          const res = await fetch("/inventory", { cache: "no-store" });
+          const data = await res.json();
+
+          const updated = new Date(data.updated);
+          document.getElementById("updated").innerText =
+            "Last updated: " + updated.toLocaleTimeString();
+
+          const entries = Object.entries(data.items);
+          const savory = [];
+          const sweet = [];
+
+          for (const [name, info] of entries) {
+            const cat = (info.category || "").toLowerCase();
+            const item = { name, ...info };
+            if (cat === "savory") savory.push(item);
+            else sweet.push(item);
+          }
+
+          renderList(document.getElementById("savory"), savory);
+          renderList(document.getElementById("sweet"), sweet);
+        } catch (e) {
+          document.getElementById("updated").innerText = "Error loading inventory";
+        }
+      }
+
+      // Fullscreen button (works on most TVs/browsers)
+      document.getElementById("fsBtn").addEventListener("click", async () => {
+        try {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+          } else {
+            await document.exitFullscreen();
+          }
+        } catch (e) {
+          // ignore
+        }
+      });
+
+      loadInventory();
+      setInterval(loadInventory, 5000);
+    </script>
+  </body>
+</html>
