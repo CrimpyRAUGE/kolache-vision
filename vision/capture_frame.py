@@ -1,6 +1,5 @@
 from pathlib import Path
 import time
-
 import cv2
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,13 +11,29 @@ def main():
     if not cap.isOpened():
         raise RuntimeError("Could not open camera 0")
 
-    # warm-up
-    time.sleep(1.0)
+    # =========================
+    # Camera warm-up
+    # =========================
+    warmup_seconds = 2.0
+    warmup_frames = 20
 
+    # Let auto-exposure / white balance settle by time
+    t_end = time.time() + warmup_seconds
+    while time.time() < t_end:
+        cap.read()
+
+    # Flush several frames (autofocus usually stabilizes here)
+    for _ in range(warmup_frames):
+        cap.read()
+
+    # =========================
+    # Capture final frame
+    # =========================
     ok, frame = cap.read()
     cap.release()
-    if not ok:
-        raise RuntimeError("Failed to capture frame")
+
+    if not ok or frame is None:
+        raise RuntimeError("Failed to capture frame after warm-up")
 
     path = OUT / "calibration.jpg"
     cv2.imwrite(str(path), frame)
