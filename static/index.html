@@ -1,247 +1,373 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Kolache Availability</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kolache Availability</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #121926;
+      --panel2: #0f1622;
+      --text: #e7eef8;
+      --muted: #9db0c7;
+      --good: #2ecc71;
+      --warn: #f1c40f;
+      --bad: #e74c3c;
+      --border: rgba(255,255,255,.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 600px at 20% 0%, #13223a 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(11,15,20,.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+    .top {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+    h1 { margin: 0; font-size: 20px; letter-spacing: .2px; }
+    .sub {
+      margin-top: 6px;
+      color: var(--muted);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 13px;
+    }
+    .pill {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: rgba(18,25,38,.65);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--warn); display: inline-block; }
+    .dot.good { background: var(--good); }
+    .dot.bad { background: var(--bad); }
 
-    <style>
-      :root {
-        --bg: #0d0f12;
-        --card: #161a20;
-        --text: #ffffff;
-        --muted: rgba(255, 255, 255, 0.7);
-        --good: #1f7a1f;
-        --low: #8a6d00;
-        --out: #7a1f1f;
-        --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-        --radius: 18px;
-      }
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    input, select, button {
+      background: rgba(18,25,38,.85);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    input { width: min(320px, 60vw); }
+    button { cursor: pointer; font-weight: 700; }
+    button:hover { filter: brightness(1.06); }
 
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: radial-gradient(1200px 600px at 50% 0%, #151a22 0%, var(--bg) 55%);
-        color: var(--text);
-      }
+    main .wrap { padding-top: 18px; padding-bottom: 36px; }
 
-      .wrap {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 28px 18px 36px;
-      }
+    .section-title {
+      margin: 22px 0 10px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 14px;
-      }
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
 
-      .title {
-        display: flex;
-        align-items: baseline;
-        gap: 14px;
-      }
+    .card {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(18,25,38,.92), rgba(15,22,34,.92));
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      position: relative;
+      overflow: hidden;
+    }
 
-      h1 {
-        margin: 0;
-        font-size: clamp(28px, 4vw, 54px);
-        letter-spacing: 0.5px;
-      }
+    .card.soldout {
+      background: linear-gradient(180deg, rgba(60,18,18,.82), rgba(24,10,10,.82));
+      border-color: rgba(231,76,60,.35);
+    }
 
-      .sub {
-        margin: 0;
-        color: var(--muted);
-        font-size: clamp(14px, 1.6vw, 18px);
-      }
+    .row { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+    .name { font-weight: 800; font-size: 16px; line-height: 1.2; }
+    .category {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+      text-transform: capitalize;
+    }
 
-      .btn {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: var(--text);
-        padding: 10px 14px;
-        border-radius: 999px;
-        font-size: 14px;
-        cursor: pointer;
-      }
+    .badge {
+      font-size: 12px;
+      font-weight: 900;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      white-space: nowrap;
+    }
+    .badge.good { border-color: rgba(46,204,113,.35); color: #bff7d4; background: rgba(46,204,113,.10); }
+    .badge.bad { border-color: rgba(231,76,60,.5); color: #ffd2cc; background: rgba(231,76,60,.14); }
+    .badge.warn { border-color: rgba(241,196,15,.5); color: #fff0b0; background: rgba(241,196,15,.12); }
 
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 18px;
-        margin-top: 18px;
-      }
+    .bar {
+      margin-top: 12px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: var(--good);
+      transition: width .25s ease;
+    }
+    .card.soldout .fill { background: var(--bad); }
 
-      @media (min-width: 900px) {
-        .grid {
-          grid-template-columns: 1fr 1fr;
-          gap: 22px;
-        }
-      }
+    .counts {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-      .group {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: var(--radius);
-        padding: 16px;
-        box-shadow: var(--shadow);
-      }
-
-      .group h2 {
-        margin: 4px 6px 14px;
-        font-size: clamp(18px, 2.4vw, 28px);
-        color: rgba(255, 255, 255, 0.92);
-      }
-
-      .item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 16px 16px;
-        margin: 10px 6px;
-        border-radius: 14px;
-        font-size: clamp(16px, 2.1vw, 26px);
-        line-height: 1.2;
-      }
-
-      .name {
-        font-weight: 650;
-      }
-
-      .count {
-        font-weight: 900;
-        white-space: nowrap;
-        letter-spacing: 0.3px;
-      }
-
-      .available {
-        background: linear-gradient(180deg, rgba(31, 122, 31, 0.95), rgba(31, 122, 31, 0.75));
-      }
-
-      .low {
-        background: linear-gradient(180deg, rgba(138, 109, 0, 0.95), rgba(138, 109, 0, 0.75));
-      }
-
-      .soldout {
-        background: linear-gradient(180deg, rgba(122, 31, 31, 0.95), rgba(122, 31, 31, 0.75));
-        text-decoration: line-through;
-        opacity: 0.92;
-      }
-
-      footer {
-        margin-top: 16px;
-        text-align: center;
-        color: var(--muted);
-        font-size: 14px;
-      }
-    </style>
-  </head>
-
-  <body>
+    .footer-note {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 12px;
+      opacity: .9;
+    }
+  </style>
+</head>
+<body>
+  <header>
     <div class="wrap">
-      <header>
+      <div class="top">
         <div>
-          <div class="title">
-            <h1>🥐 Kolache Availability</h1>
+          <h1>Kolache Availability</h1>
+          <div class="sub">
+            <span class="pill"><span id="statusDot" class="dot"></span><span id="statusText">Loading…</span></span>
+            <span class="pill">Last update: <span id="lastUpdated">—</span></span>
+            <span class="pill">Auto refresh: <span id="refreshEvery">3s</span></span>
           </div>
-          <p class="sub" id="updated">Loading…</p>
         </div>
-
-        <button class="btn" id="fsBtn">Fullscreen</button>
-      </header>
-
-      <div class="grid" id="grid">
-        <div class="group">
-          <h2>🥓 Savory</h2>
-          <div id="savory">Loading…</div>
-        </div>
-
-        <div class="group">
-          <h2>🍓 Sweet</h2>
-          <div id="sweet">Loading…</div>
+        <div class="controls">
+          <input id="search" placeholder="Search kolaches…" />
+          <select id="view">
+            <option value="all">All</option>
+            <option value="savory">Savory</option>
+            <option value="sweet">Sweet</option>
+          </select>
+          <button id="refreshBtn">Refresh</button>
         </div>
       </div>
-
-      <footer>
-        Auto-refreshes every 5 seconds
-      </footer>
     </div>
+  </header>
 
-    <script>
-      function statusClass(current, max) {
-        if (current <= 0) return "soldout";
-        if (current <= Math.ceil(max * 0.25)) return "low";
-        return "available";
+  <main>
+    <div class="wrap">
+      <div id="content"></div>
+      <div class="footer-note">
+        Tip: If the board looks stale, refresh. If it stays stale, the camera/vision device may be offline.
+      </div>
+    </div>
+  </main>
+
+<script>
+  const REFRESH_MS = 3000;
+  const STALE_AFTER_MS = 15000; // show warning if no update in 15s
+
+  const els = {
+    content: document.getElementById("content"),
+    statusDot: document.getElementById("statusDot"),
+    statusText: document.getElementById("statusText"),
+    lastUpdated: document.getElementById("lastUpdated"),
+    refreshEvery: document.getElementById("refreshEvery"),
+    search: document.getElementById("search"),
+    view: document.getElementById("view"),
+    refreshBtn: document.getElementById("refreshBtn"),
+  };
+
+  els.refreshEvery.textContent = (REFRESH_MS/1000) + "s";
+
+  function fmtTime(iso) {
+    if (!iso) return "—";
+    try {
+      const d = new Date(iso);
+      return d.toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', second:'2-digit'});
+    } catch { return iso; }
+  }
+
+  function setStatus(kind, text) {
+    els.statusText.textContent = text;
+    els.statusDot.classList.remove("good", "bad");
+    if (kind === "good") els.statusDot.classList.add("good");
+    if (kind === "bad") els.statusDot.classList.add("bad");
+  }
+
+  function normalizeInventory(data) {
+    // Supports:
+    // 1) new structure: { updated, items: {name:{current,max,category}} }
+    // 2) old flat counts: { "Ham": 3, "Bacon": 0 }
+    if (data && data.items) return data;
+
+    const items = {};
+    for (const [name, current] of Object.entries(data || {})) {
+      items[name] = { current: Number(current || 0), max: 12, category: "unknown" };
+    }
+    return { updated: null, items };
+  }
+
+  function filterItems(items) {
+    const q = (els.search.value || "").trim().toLowerCase();
+    const view = els.view.value;
+
+    return Object.entries(items)
+      .filter(([name, it]) => {
+        const matchesText =
+          !q ||
+          name.toLowerCase().includes(q) ||
+          (it.category || "").toLowerCase().includes(q);
+        const matchesView = view === "all" || (it.category || "").toLowerCase() === view;
+        return matchesText && matchesView;
+      })
+      .map(([name, it]) => ({ name, ...it }));
+  }
+
+  function groupByCategory(list) {
+    const groups = new Map();
+    for (const it of list) {
+      const cat = (it.category || "unknown").toLowerCase();
+      if (!groups.has(cat)) groups.set(cat, []);
+      groups.get(cat).push(it);
+    }
+    return groups;
+  }
+
+  function cardHTML(it) {
+    const max = Number(it.max || 0) || 12;
+    const current = Math.max(0, Math.min(max, Number(it.current || 0)));
+    const soldOut = current <= 0;
+    const pct = max > 0 ? Math.round((current / max) * 100) : 0;
+
+    const badge = soldOut
+      ? `<span class="badge bad">SOLD OUT</span>`
+      : current <= 2
+        ? `<span class="badge warn">LOW</span>`
+        : `<span class="badge good">IN STOCK</span>`;
+
+    return `
+      <div class="card ${soldOut ? "soldout" : ""}">
+        <div class="row">
+          <div>
+            <div class="name">${it.name}</div>
+            <div class="category">${it.category || "unknown"}</div>
+          </div>
+          ${badge}
+        </div>
+        <div class="bar"><div class="fill" style="width:${soldOut ? 0 : pct}%;"></div></div>
+        <div class="counts">
+          <div>${current} left</div>
+          <div>max ${max}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function render(data) {
+    const inv = normalizeInventory(data);
+    const updated = inv.updated;
+    els.lastUpdated.textContent = fmtTime(updated);
+
+    const items = filterItems(inv.items);
+
+    // Status logic
+    if (!updated) {
+      setStatus("good", "Live");
+    } else {
+      const age = Date.now() - new Date(updated).getTime();
+      if (isNaN(age)) {
+        setStatus("good", "Live");
+      } else if (age > STALE_AFTER_MS) {
+        setStatus("bad", "Stale data");
+      } else {
+        setStatus("good", "Live");
       }
+    }
 
-      function renderList(targetEl, items) {
-        targetEl.innerHTML = "";
+    // Group + render
+    const groups = groupByCategory(items);
+    const order = ["savory", "sweet", "unknown"];
 
-        // sort by lowest inventory first
-        items.sort((a, b) => a.current - b.current);
+    let html = "";
+    for (const cat of order) {
+      if (!groups.has(cat)) continue;
+      const list = groups.get(cat);
+      if (!list.length) continue;
 
-        for (const item of items) {
-          const row = document.createElement("div");
-          row.className = "item " + statusClass(item.current, item.max);
+      html += `<div class="section-title">${cat}</div>`;
+      html += `<div class="grid">`;
+      html += list.map(cardHTML).join("");
+      html += `</div>`;
+    }
 
-          row.innerHTML = `
-            <div class="name">${item.name}</div>
-            <div class="count">${item.current <= 0 ? "SOLD OUT" : `${item.current} / ${item.max}`}</div>
-          `;
+    if (!html) {
+      html = `<div class="section-title">No matches</div>`;
+    }
 
-          targetEl.appendChild(row);
-        }
+    els.content.innerHTML = html;
+  }
 
-        if (items.length === 0) {
-          targetEl.innerHTML = `<div style="color:rgba(255,255,255,0.7); padding:10px 6px;">No items</div>`;
-        }
-      }
+  async function fetchInventory() {
+    try {
+      const res = await fetch("/inventory", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      render(data);
+    } catch (e) {
+      setStatus("bad", "Offline");
+      els.lastUpdated.textContent = "—";
+      els.content.innerHTML = `<div class="section-title">Offline</div>
+        <div style="color: var(--muted);">Could not reach /inventory. Is the server running?</div>`;
+    }
+  }
 
-      async function loadInventory() {
-        try {
-          const res = await fetch("/inventory", { cache: "no-store" });
-          const data = await res.json();
+  els.refreshBtn.addEventListener("click", fetchInventory);
+  els.search.addEventListener("input", fetchInventory);
+  els.view.addEventListener("change", fetchInventory);
 
-          const updated = new Date(data.updated);
-          document.getElementById("updated").innerText =
-            "Last updated: " + updated.toLocaleTimeString();
-
-          const entries = Object.entries(data.items);
-          const savory = [];
-          const sweet = [];
-
-          for (const [name, info] of entries) {
-            const cat = (info.category || "").toLowerCase();
-            const item = { name, ...info };
-            if (cat === "savory") savory.push(item);
-            else sweet.push(item);
-          }
-
-          renderList(document.getElementById("savory"), savory);
-          renderList(document.getElementById("sweet"), sweet);
-        } catch (e) {
-          document.getElementById("updated").innerText = "Error loading inventory";
-        }
-      }
-
-      // Fullscreen button (works on most TVs/browsers)
-      document.getElementById("fsBtn").addEventListener("click", async () => {
-        try {
-          if (!document.fullscreenElement) {
-            await document.documentElement.requestFullscreen();
-          } else {
-            await document.exitFullscreen();
-          }
-        } catch (e) {
-          // ignore
-        }
-      });
-
-      loadInventory();
-      setInterval(loadInventory, 5000);
-    </script>
-  </body>
+  fetchInventory();
+  setInterval(fetchInventory, REFRESH_MS);
+</script>
+</body>
 </html>
